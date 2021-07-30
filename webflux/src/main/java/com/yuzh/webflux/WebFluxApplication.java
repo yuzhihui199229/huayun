@@ -1,12 +1,12 @@
 package com.yuzh.webflux;
 
+import com.yuzh.webflux.Config.NettyClient;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
-import reactor.core.publisher.Flux;
-import reactor.netty.tcp.TcpClient;
-import reactor.netty.tcp.TcpServer;
+import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
 @SpringBootApplication
 public class WebFluxApplication {
@@ -14,31 +14,13 @@ public class WebFluxApplication {
         SpringApplication.run(WebFluxApplication.class, args);
     }
 
+    @Autowired
+    private NettyClient nettyClient;
+
     @Bean
-    CommandLineRunner serverRunner(TcpDecoderHanlder tcpDecoderHanlder) {
+    CommandLineRunner serverRunner() {
         return strings -> {
-            createTcpServer(tcpDecoderHanlder);
+            nettyClient.start();
         };
     }
-
-    /**
-     * 创建TCP Server
-     *
-     * @param tcpDecoderHanlder： 解析TCP Client上报数据的handler
-     */
-    private void createTcpServer(TcpDecoderHanlder tcpDecoderHanlder) {
-        TcpServer.create()
-                .handle((in, out) -> {
-                    in.receive()
-                            .asByteArray()
-                            .subscribe();
-                    return Flux.never();
-
-                })
-                .doOnConnection(conn ->
-                        conn.addHandler(tcpDecoderHanlder)) //实例只写了如何添加handler,可添加delimiter，tcp生命周期，decoder，encoder等handler
-                .port(9999)
-                .bindNow();
-    }
-
 }

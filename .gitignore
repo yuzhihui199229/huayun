@@ -1,3 +1,4 @@
 # Project exclude paths
 /swagger/target/
 /webflux/target/
+/.idea
