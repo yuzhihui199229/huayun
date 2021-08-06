@@ -1,0 +1,23 @@
+package com.yuzh.huayun;
+
+import com.yuzh.huayun.config.NettyClientBootStrap;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+
+@SpringBootApplication
+public class NettyClientApplication implements CommandLineRunner {
+ 
+    @Autowired
+    private NettyClientBootStrap serverBootStrap;
+ 
+    public static void main(String[] args) {
+        SpringApplication.run(NettyClientApplication.class, args);
+    }
+ 
+    @Override
+    public void run(String... args) throws Exception {
+        serverBootStrap.start();
+    }
+}

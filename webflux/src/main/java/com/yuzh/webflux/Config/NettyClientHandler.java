@@ -2,10 +2,12 @@ package com.yuzh.webflux.Config;
 
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelPromise;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.handler.timeout.IdleStateEvent;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
 
 import java.net.InetSocketAddress;
@@ -18,8 +20,13 @@ import java.util.Map;
 public class NettyClientHandler extends SimpleChannelInboundHandler<MessageProtocol> {
     public static Map<String, Object> map = new HashMap<>();
 
-    @Autowired
-    private NettyClient nettyClient;
+
+    private ChannelHandlerContext ctx;
+//    private ChannelPromise promise;
+    private MessageProtocol response;
+//
+//    @Autowired
+//    private NettyClient nettyClient;
 
     @Override
     public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception {
@@ -46,13 +53,19 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageProto
 //        nettyClientMore.restart(switchInfoList.get(0));
     }
 
+//    @Override
+//    public void channelActive(ChannelHandlerContext ctx) throws Exception {
+//        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
+//        int port = ipSocket.getPort();
+//        String host = ipSocket.getHostString();
+//        log.info("与设备"+host+":"+port+"连接成功!");
+//        ctx.fireChannelActive();
+//    }
+
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
-        InetSocketAddress ipSocket = (InetSocketAddress) ctx.channel().remoteAddress();
-        int port = ipSocket.getPort();
-        String host = ipSocket.getHostString();
-        log.info("与设备"+host+":"+port+"连接成功!");
-        ctx.fireChannelActive();
+        super.channelActive(ctx);
+        this.ctx = ctx;
     }
 
     @Override
@@ -62,6 +75,23 @@ public class NettyClientHandler extends SimpleChannelInboundHandler<MessageProto
 
     @Override
     protected void channelRead0(ChannelHandlerContext ctx, MessageProtocol message) throws Exception {
-        log.info("接收到消息：{}",message);
+        MessageProtocol msg = (MessageProtocol) message;
+        if (msg != null) {
+            response = message;
+//            promise.setSuccess();
+        }
+//        else {
+//            ctx.fireChannelRead(msg);
+//        }
+        ctx.writeAndFlush(msg);
+
+    }
+
+    public void sendMessage(MessageProtocol message){
+        ctx.writeAndFlush(message);
+    }
+
+    public MessageProtocol getResponse() {
+        return response;
     }
 }

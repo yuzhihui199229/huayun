@@ -11,6 +11,9 @@
     <modules>
         <module>webflux</module>
         <module>swagger</module>
+        <module>NettyServer</module>
+        <module>NettyClient</module>
+        <module>option</module>
     </modules>
 
     <parent>
